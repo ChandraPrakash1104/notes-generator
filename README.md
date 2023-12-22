@@ -1,1 +1,1 @@
-"# notes-generator" 
+# notes-generator
