@@ -1,12 +1,76 @@
-const express = require('express');
-const cors = require('cors');
+import { YoutubeTranscript } from 'youtube-transcript';
+import express from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import { config } from 'dotenv';
+import { OpenAI } from 'openai';
 
+config();
 const app = express();
+
+app.use(bodyParser.json());
 app.use(cors());
 const PORT = process.env.PORT || 3000;
 
-app.get('/api/data', (req, res) => {
-  res.json({ message: 'Hello from the server!' });
+const openai = new OpenAI({
+  key: process.env.OPENAI_API_KEY,
+});
+
+const splitTranscriptIntoChunks = (transcript, maxLength) => {
+  const words = transcript.split(' ');
+  const chunks = [];
+  let currentChunk = '';
+
+  for (let word of words) {
+    if ((currentChunk + word).length <= maxLength) {
+      currentChunk += ' ' + word;
+    } else {
+      chunks.push(currentChunk);
+      currentChunk = word;
+    }
+  }
+
+  chunks.push(currentChunk);
+
+  return chunks;
+};
+
+const main = async (transcript) => {
+  const chunks = splitTranscriptIntoChunks(transcript, 4096);
+  let notes = '';
+
+  for (let chunk of chunks) {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `prepare notes for given transcript ${chunk}`,
+        },
+      ],
+      model: 'gpt-3.5-turbo',
+    });
+
+    const res = completion.choices[0].message.content;
+    notes += res;
+    break;
+  }
+
+  return notes;
+};
+app.post('/', async (req, res) => {
+  const { url } = req.body;
+
+  try {
+    const captionObj = await YoutubeTranscript.fetchTranscript(url);
+    const transcript = captionObj.map((obj) => obj.text).join('. ');
+
+    const notes = await main(transcript);
+
+    res.json({ message: notes });
+  } catch (error) {
+    console.error('Error fetching transcript:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.listen(PORT, () => {

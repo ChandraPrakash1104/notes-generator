@@ -1,0 +1,31 @@
+.search_bar {
+  display: flex;
+  position: relative;
+}
+
+.search_bar input {
+  width: 400px;
+  padding-left: 20px;
+  border-radius: 8px 0px 0px 8px;
+  text-decoration: none;
+}
+.valid_input {
+  border: none;
+}
+.invalid_input {
+  border: 1px solid red;
+}
+/* input:focus {s
+  outline: 2px solid #ff6347; 
+} */
+
+.search_bar button {
+  border-radius: 0px 8px 8px 0px;
+  text-decoration: none;
+}
+
+.invalid {
+  position: absolute;
+  top: -40px;
+  color: rgb(236, 52, 52);
+}

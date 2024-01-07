@@ -1,32 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import './App.css';
+import SearchBar from './SearchBar';
+import Display from './Display';
 
 function App() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/data');
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const [content, setContent] = useState(``);
+  const handleContent = (data) => {
+    setContent(data);
+  };
   return (
     <div className='App'>
-      <h1>React App</h1>
-      {data && <p>Server message: {data.message}</p>}
+      <SearchBar setData={handleContent} />
+      {content.length != 0 && <Display data={content} />}
     </div>
   );
 }
