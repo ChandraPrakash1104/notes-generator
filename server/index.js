@@ -3,20 +3,13 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import { config } from 'dotenv';
-import { OpenAI } from 'openai';
 
 config();
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cors());
-const PORT = process.env.PORT || 3000;
-
-const openai = new OpenAI({
-  key: process.env.OPENAI_API_KEY,
-});
-
-const ai21 = process.env.AI21_API_KEY;
+const PORT = 3000;
 
 const splitTranscriptIntoChunks = (transcript, maxLength) => {
   const words = transcript.split(' ');
@@ -37,55 +30,22 @@ const splitTranscriptIntoChunks = (transcript, maxLength) => {
   return chunks;
 };
 
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const genAI = new GoogleGenerativeAI(process.env.GIMINI_API_KEY);
+
 const main = async (transcript) => {
-  // const chunks = splitTranscriptIntoChunks(transcript, 4096);
-  // let notes = '';
+  const chunks = splitTranscriptIntoChunks(transcript, 20000);
+  let notes = '';
+  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  for (let chunk of chunks) {
+    const prompt = `Creates Notes from the following transcript ${chunk}`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    notes += text;
+  }
 
-  // for (let chunk of chunks) {
-  //   const completion = await openai.chat.completions.create({
-  //     messages: [
-  //       {
-  //         role: 'system',
-  //         content: `prepare notes for given transcript ${chunk}`,
-  //       },
-  //     ],
-  //     model: 'gpt-3.5-turbo',
-  //   });
-
-  //   const res = completion.choices[0].message.content;
-  //   notes += res;
-  //   break;
-  // }
-  // const chunks = splitTranscriptIntoChunks(transcript, 4096);
-  // let notes = '';
-
-  // for (let chunk of chunks) {
-  //   const completion = await openai.chat.completions.create({
-  //     messages: [
-  //       {
-  //         role: 'system',
-  //         content: `prepare notes for given transcript ${chunk}`,
-  //       },
-  //     ],
-  //     model: 'gpt-3.5-turbo',
-  //   });
-
-  //   const res = completion.choices[0].message.content;
-  //   notes += res;
-  //   break;
-  // }
-  const res = await fetch('https://api.ai21.com/studio/v1/summarize', {
-    headers: {
-      Authorization: `Bearer ${ai21}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      source: transcript,
-      sourceType: 'TEXT',
-    }),
-    method: 'POST',
-  });
-  const notes = await res.json();
   return notes;
 };
 app.post('/', async (req, res) => {

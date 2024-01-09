@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import classes from './SearchBar.module.css';
-import searchIcon from './searchIcon.svg';
 
 const SearchBar = (props) => {
   const [url, setUrl] = useState('');

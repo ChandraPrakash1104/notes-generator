@@ -20,12 +20,7 @@ function App() {
 
     const data = await response.json();
     setIsLoading(false);
-    const msg = data.message.summary;
-    if (msg === undefined) {
-      setContent('Sorry try other links...');
-      return;
-    }
-    setContent(data.message.summary);
+    setContent(data.message);
   };
 
   return (
