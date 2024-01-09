@@ -16,6 +16,8 @@ const openai = new OpenAI({
   key: process.env.OPENAI_API_KEY,
 });
 
+const ai21 = process.env.AI21_API_KEY;
+
 const splitTranscriptIntoChunks = (transcript, maxLength) => {
   const words = transcript.split(' ');
   const chunks = [];
@@ -36,25 +38,54 @@ const splitTranscriptIntoChunks = (transcript, maxLength) => {
 };
 
 const main = async (transcript) => {
-  const chunks = splitTranscriptIntoChunks(transcript, 4096);
-  let notes = '';
+  // const chunks = splitTranscriptIntoChunks(transcript, 4096);
+  // let notes = '';
 
-  for (let chunk of chunks) {
-    const completion = await openai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `prepare notes for given transcript ${chunk}`,
-        },
-      ],
-      model: 'gpt-3.5-turbo',
-    });
+  // for (let chunk of chunks) {
+  //   const completion = await openai.chat.completions.create({
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         content: `prepare notes for given transcript ${chunk}`,
+  //       },
+  //     ],
+  //     model: 'gpt-3.5-turbo',
+  //   });
 
-    const res = completion.choices[0].message.content;
-    notes += res;
-    break;
-  }
+  //   const res = completion.choices[0].message.content;
+  //   notes += res;
+  //   break;
+  // }
+  // const chunks = splitTranscriptIntoChunks(transcript, 4096);
+  // let notes = '';
 
+  // for (let chunk of chunks) {
+  //   const completion = await openai.chat.completions.create({
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         content: `prepare notes for given transcript ${chunk}`,
+  //       },
+  //     ],
+  //     model: 'gpt-3.5-turbo',
+  //   });
+
+  //   const res = completion.choices[0].message.content;
+  //   notes += res;
+  //   break;
+  // }
+  const res = await fetch('https://api.ai21.com/studio/v1/summarize', {
+    headers: {
+      Authorization: `Bearer ${ai21}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      source: transcript,
+      sourceType: 'TEXT',
+    }),
+    method: 'POST',
+  });
+  const notes = await res.json();
   return notes;
 };
 app.post('/', async (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from './SearchBar.module.css';
 import searchIcon from './searchIcon.svg';
 
@@ -23,21 +23,17 @@ const SearchBar = (props) => {
       setIsValid(false);
       return;
     }
-    const response = await fetch('http://localhost:3000/', {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify({ url }),
-    });
-
-    const data = await response.json();
-    props.setData(data.message);
+    await props.fetchData(url);
     setUrl('');
   };
 
   return (
-    <form action='' className={classes.search_bar} onSubmit={handleSubmit}>
+    <form
+      autoComplete='off'
+      action=''
+      className={classes.search_bar}
+      onSubmit={handleSubmit}
+    >
       <input
         type='text'
         name='searchUrl'
