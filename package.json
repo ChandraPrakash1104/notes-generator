@@ -1,0 +1,16 @@
+{
+  "name": "youtube-video-summarizer",
+  "version": "1.0.0",
+  "description": "## A simple app that allows you to paste a YouTube video URL and receive a summary which you can further edit",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run client\" \"npm run server\"",
+    "client": "cd client && npm run dev",
+    "server": "cd server && node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
